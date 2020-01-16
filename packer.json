@@ -1,0 +1,48 @@
+{
+    "variables": {
+        "vagrant_home": "{{env `HOME`}}/.vagrant.d",
+        "base_box_version": "{{env `BASE_BOX_VERSION`}}",
+        "etcd_major_minor": "{{env `ETCD_MAJOR_MINOR`}}",
+        "etcd_patch": "{{env `ETCD_PATCH`}}",
+        "image_revision": "{{env `BUILD_NUMBER`}}"
+    },
+    "builders": [
+        {
+            "type": "virtualbox-ovf",
+            "headless": true,
+            "source_path": "{{ user `vagrant_home` }}/boxes/jumperfly-VAGRANTSLASH-centos-7/{{ user `base_box_version` }}/virtualbox/box.ovf",
+            "guest_additions_mode": "disable",
+            "ssh_username": "root",
+            "ssh_password": "vagrant",
+            "shutdown_command": "poweroff",
+            "vboxmanage": [
+                [
+                    "modifyvm",
+                    "{{.Name}}",
+                    "--memory",
+                    "2048",
+                    "--cpus",
+                    "4"
+                ]
+            ]
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "ansible",
+            "playbook_file": "./playbook.yml",
+            "galaxy_file": "requirements.yml",
+            "roles_path": "roles",
+            "groups": ["etcd_nodes"]
+        }
+    ],
+    "post-processors": [
+        [
+            {
+                "type": "vagrant",
+                "output": "output-virtualbox-ovf/etcd-{{.Provider}}.box",
+                "keep_input_artifact": true
+            }
+        ]
+    ]
+}

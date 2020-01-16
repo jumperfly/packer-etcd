@@ -1,0 +1,11 @@
+- hosts: etcd_nodes
+  become: yes
+  vars:
+    etcd_enable_service: no
+    etcd_install_mode: package
+    etcd_ssl_enabled: no
+  roles:
+    - jumperfly.etcd_node
+  post_tasks:
+    - name: Clean yum cache
+      command: yum clean all
