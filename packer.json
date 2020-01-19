@@ -42,6 +42,11 @@
                 "type": "vagrant",
                 "output": "output-virtualbox-ovf/etcd-{{.Provider}}.box",
                 "keep_input_artifact": true
+            },
+            {
+                "type": "vagrant-cloud",
+                "box_tag": "jumperfly/etcd-base-{{ user `etcd_major_minor` }}",
+                "version": "{{user `etcd_patch`}}.{{user `image_revision`}}"
             }
         ]
     ]
