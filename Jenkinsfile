@@ -14,14 +14,8 @@ pipeline {
 
     stages {
         stage('Clean') {
-            when {
-                anyOf {
-                    expression { return fileExists("output-virtualbox-ovf") }
-                    expression { return fileExists("roles") }
-                }
-            }
             steps {
-                sh 'rm -rf roles output-virtualbox-ovf'
+                sh 'rm -rf roles output-*'
             }
         }
         stage ('Download Base Box') {
