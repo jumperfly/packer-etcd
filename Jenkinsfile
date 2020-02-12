@@ -16,7 +16,7 @@ pipeline {
         stage('Clean') {
             steps {
                 sh 'rm -rf roles output-*'
-                sh 'vagrant box list | grep packer_etcd && vagrant box remove packer_etcd'
+                sh 'if vagrant box list | grep packer_etcd; then vagrant box remove packer_etcd; fi'
             }
         }
         stage ('Download Base Box') {
