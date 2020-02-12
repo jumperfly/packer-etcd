@@ -1,0 +1,33 @@
+{
+    "variables": {
+        "etcd_major_minor": "{{env `ETCD_MAJOR_MINOR`}}",
+        "etcd_patch": "{{env `ETCD_PATCH`}}",
+        "image_revision": "{{env `BUILD_NUMBER`}}"
+    },
+    "builders": [
+        {
+            "name": "etcd",
+            "type": "vagrant",
+            "communicator": "ssh",
+            "provider": "virtualbox",
+            "source_path": "./output-etcd-base/package.box"
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "ansible",
+            "playbook_file": "./playbook.yml",
+            "roles_path": "roles",
+            "groups": ["etcd_nodes", "full_box"]
+        }
+    ],
+    "post-processors": [
+        [
+            {
+                "type": "vagrant-cloud",
+                "box_tag": "jumperfly/etcd-{{ user `etcd_major_minor` }}",
+                "version": "{{user `etcd_patch`}}.{{user `image_revision`}}"
+            }
+        ]
+    ]
+}

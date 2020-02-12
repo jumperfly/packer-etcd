@@ -1,9 +1,43 @@
+- hosts: full_box
+  become: yes
+  gather_facts: no
+  pre_tasks:
+    - name: Set var overrides
+      set_fact:
+        etcd_client_listen_ip: "0.0.0.0"
+        etcd_peer_listen_ip: "0.0.0.0"
+  roles:
+    - role: jumperfly.cfssl
+    - role: jumperfly.root_ca
+    - role: jumperfly.ssl_cert
+      vars:
+        ssl_cert_type: intermediate
+        ssl_cert_file_base_dir: /etc/pki/ansible-ssl-certs
+        ssl_cert_name: etcd-ca
+        ssl_cert_ca_delegate: "{{ inventory_hostname }}"
+        ssl_cert_ca_delegate_name: ca
+    - role: jumperfly.ssl_cert
+      vars:
+        ssl_cert_type: peer
+        ssl_cert_file_base_dir: /etc/etcd
+        ssl_cert_name: etcd
+        ssl_cert_ca_delegate: "{{ inventory_hostname }}"
+        ssl_cert_ca_delegate_name: etcd-ca
+        ssl_cert_subject_common_name: etcd
+        ssl_cert_hosts:
+          - etcd
+          - "0.0.0.0"
+          - "127.0.0.1"
+          - localhost
 - hosts: etcd_nodes
   become: yes
   vars:
     etcd_enable_service: no
     etcd_install_mode: package
-    etcd_ssl_enabled: no
+    etcd_ssl_enabled: "{{ 'full_box' in group_names }}"
+    etcd_private_key: /etc/etcd/etcd-key.pem
+    etcd_cert: /etc/etcd/etcd.pem
+    etcd_ca_cert: /etc/etcd/etcd-chain.pem
   roles:
     - jumperfly.etcd_node
   post_tasks:
@@ -11,3 +45,8 @@
       command: yum clean all
       args:
         warn: no
+    - name: Enable etcd service for full box
+      service:
+        name: etcd
+        enabled: yes
+      when: "'full_box' in group_names"

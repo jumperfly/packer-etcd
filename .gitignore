@@ -1,3 +1,4 @@
 roles
 output-*
 packer_cache
+.vagrant

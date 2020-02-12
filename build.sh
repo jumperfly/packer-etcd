@@ -7,4 +7,6 @@ if [ ! -f $HOME/.vagrant.d/boxes/jumperfly-VAGRANTSLASH-centos-7/$BASE_BOX_VERSI
   $BOX_ADD_CMD
 fi
 rm -rf roles output-*
-packer build -var 'skip_add=true' -except=vagrant-cloud packer.json
+vagrant box list | grep packer_etcd && vagrant box remove packer_etcd
+packer build -except=vagrant-cloud etcd-base.json
+packer build -except=vagrant-cloud etcd.json

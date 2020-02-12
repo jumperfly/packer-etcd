@@ -16,6 +16,7 @@ pipeline {
         stage('Clean') {
             steps {
                 sh 'rm -rf roles output-*'
+                sh 'vagrant box list | grep packer_etcd && vagrant box remove packer_etcd'
             }
         }
         stage ('Download Base Box') {
@@ -26,9 +27,14 @@ pipeline {
                 sh "vagrant box add jumperfly/centos-7 --box-version $BASE_BOX_VERSION"
             }
         }
+        stage('Build Base') {
+            steps {
+                sh 'packer build etcd-base.json'
+            }
+        }
         stage('Build') {
             steps {
-                sh 'packer build packer.json'
+                sh 'packer build etcd.json'
             }
         }
     }
